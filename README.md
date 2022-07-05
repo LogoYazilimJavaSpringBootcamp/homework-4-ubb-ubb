@@ -95,7 +95,90 @@ customer_id |
 
 JDBC, JdbcTemplate ve Hibernate servislerini uygulayan DAO interface ve implementasyonlarını örnek olarak [2 klasöründe](/2) inceleyebilirsiniz.
 
+Örnek UML: 
+
 ![Persistence UML](https://i.ibb.co/5B3gw5v/Persistence.png)
+
+Üç farklı örnek uygulama için basit bir Employee sınıfı ve POJO oluşturuldu.
+
+```
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = "employee")
+/**
+*  Simple POJO Employee class represents employee.
+*
+*/
+public class Employee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column
+    private String name;
+
+    @Column
+    private int age;
+
+    @Column
+    private String position;
+}
+```
+
+EmployeeDao interface'i oluşturuldu. Polymorphism yardımıyla bu interface'in hem JDBC hem de JDBCTemplate implementasyonu yapıldı.
+
+```
+public interface EmployeeDao<T>{
+
+    T  get(long id);
+    List<T> getAll();
+    T save(T t);
+    T update(T t, long id);
+    void delete(long id);
+}
+```
+
+EmployeeDao implementasyonları olan EmployeeDaoJDBCImp ve EmployeeDaoTemplateImp basit CRUD operasyonlarını gerçekleştirebilmektedir.
+
+Hibernate için ise JpaRepository interface'i inherit edildi. Bu sınıf da basit CRUD operasyonlarını gerçekleştirebilmektedir
+
+```
+public interface EmployeeDaoHibernateImp extends JpaRepository <Employee, Long>{
+    Employee getEmployeeById(long id);
+    void deleteById(long id);
+}
+```
+
+
+Main application'da CommandLineRunner yardımıyla örnek veriler 3 farklı yönteme göre işlenerek postgresql'e kayıt edildi.
+```
+    // Sample employee data
+    Employee employee = new Employee(1L, "Umut", 16, "JDBC Template User");
+    Employee employee2 = new Employee(2L, "Gulfem", 17, "Hibernate User");
+    Employee employee3 = new Employee(3L, "Batu", 18, "JDBC User");
+
+
+        // Jdbc Connection
+        employeeService.jdbcDeleteById(2);
+        employeeService.jdbcCreate(employee3);
+        employeeService.jdbcGetById(2);
+        employeeService.jdbcUpdateById(employee2, 1);
+
+
+        // Using JDBC Template
+        employeeService.jdbcTemplateCreate(employee);
+        employeeService.jdbcTemplateDelete(2);
+        log.info("JDBC Template Get By Id" + employeeService.jdbcTemplateGetById(1));
+        employeeService.jdbcTemplateUpdate(employee2, 1);
+
+        // Using Hibernate
+        employeeService.hibernateCreate(employee3);
+        employeeService.hibernateDelete(1);
+        employeeService.hibernateGetById(3);
+        employeeService.hibernateUpdate(employee3, 1);
+```
 
 Standart JDBC kullanırken, bağlantıların yönetimi açılıp kapanması manuel olduğu için daha fazla iş yükü oluşturduğunu düşünüyorum. JDBCTemplate basmakalıp kodlardan kurtulmamızı sağlıyor.
 Ayrıca JDBCTemplate de olan JDBC standartında olmayan, .update, .execute methodları içerisinde değişken kullanılmaması, uygunsuzluk yaratmaktadır. 

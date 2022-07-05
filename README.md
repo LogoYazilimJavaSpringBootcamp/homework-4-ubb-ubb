@@ -8,7 +8,7 @@ Isbasi uygulaması RestController'dan verileri rabbitMQListener uygulamasına ra
 rabbitMQListener uygulaması kuyruktan okuduğu veriyi mapler, mapledikten sonra Postgresql isbasi databaseine objeleri kaydeder.
 
 Bu işlem İsbasi uygulamasındaki, ***Account, Address, Customer ve Invoice*** sınıfları için uygulanmıştır.
-Dört model için yazılan API servislerinin işlevlerini basit bir şekilde açıklayan [API dökümantasyonunda](https://documenter.getpostman.com/view/19776700/UzBsGiqV#f24fbce4-40b0-4d6e-bc1f-626efc213c83) inceleyebilirsiniz.
+Dört model için yazılan API servislerinin işlevlerini basit bir şekilde açıklayan [API dökümantasyonunda](https://documenter.getpostman.com/view/19776700/UzBsGiqV#intro) inceleyebilirsiniz.
 
 ![Application Flow Chart](https://images2.imgbox.com/7a/5d/SkKETayw_o.png)
 

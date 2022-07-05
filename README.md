@@ -3,7 +3,7 @@
 Producer(isbasi) ve Consumer(rabbitMQListener) uygulamalarını [1 klasöründe](/1) klasöründe inceleyebilirsiniz.
 
 
-Isbasi uygulaması RestController'dan verileri rabbitMQListener uygulamasına rabbitMQ aracılığı ile gönderir. 
+Isbasi uygulaması, RestController'dan aldığı verileri, rabbitMQListener uygulamasına, rabbitMQ aracılığı ile gönderir. 
 
 rabbitMQListener uygulaması kuyruktan okuduğu veriyi mapler, mapledikten sonra Postgresql isbasi databaseine objeleri kaydeder.
 
@@ -99,7 +99,7 @@ JDBC, JdbcTemplate ve Hibernate servislerini uygulayan DAO interface ve implemen
 
 ![Persistence UML](https://i.ibb.co/5B3gw5v/Persistence.png)
 
-Üç farklı örnek uygulama için basit bir Employee sınıfı ve POJO oluşturuldu.
+Üç farklı örnek uygulama için basit bir Employee POJO oluşturuldu.
 
 ```
 @Data

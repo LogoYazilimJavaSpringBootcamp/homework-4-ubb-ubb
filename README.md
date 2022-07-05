@@ -2,10 +2,94 @@
 
 Producer(isbasi) ve Consumer(rabbitMQListener) uygulamalarını [1 klasöründe](/1) klasöründe inceleyebilirsiniz.
 
-Isbasi uygulaması, verileri RabbitMQListener uygulamasına rabbitMQ aracılığı ile mesaj gönderir. 
-RabbitMQListener uygulaması kuyruktan okuduğu veriyi mapledikten sonra Postgresql isbasi databesine objeleri kaydeder.
 
-![Application Flow Chart](https://i.ibb.co/pxj4vN8/flow.png)
+Isbasi uygulaması RestController'dan verileri rabbitMQListener uygulamasına rabbitMQ aracılığı ile gönderir. 
+
+rabbitMQListener uygulaması kuyruktan okuduğu veriyi mapler, mapledikten sonra Postgresql isbasi databaseine objeleri kaydeder.
+
+Bu işlem İsbasi uygulamasındaki, ***Account, Address, Customer ve Invoice*** sınıfları için uygulanmıştır.
+Dört model için yazılan API servislerinin işlevlerini basit bir şekilde açıklayan [API dökümantasyonunda](https://documenter.getpostman.com/view/19776700/UzBsGiqV#f24fbce4-40b0-4d6e-bc1f-626efc213c83) inceleyebilirsiniz.
+
+![Application Flow Chart](https://i.ibb.co/tXzx4Wb/flow2.png)
+
+Account sınıfı için;
+
+Controllerdan gelen acount objesi, rabbitTemplate vasıtasıyla RabbitMQ kuyruğuna sokulur;
+```
+public Account createAccount(Account account) {
+        rabbitTemplate.convertAndSend("isbasi-exchange","accountKey",account);
+        return account;
+    }
+```
+
+RabbitMqListener projesinde bulunan RabbitMQMessageListener, gönderilen mesajları dinler.
+
+Gelen json mesaj, objectMapper yardımıyla Account sınıfıyla eşleşir.
+
+Eşleştikten sonra RabbitMqListener projesinde bulunan accountRepository Jpa Interface'ine kayıt gönderir.
+
+```
+@RabbitListener(queues = "accountQueue")
+    public void saveAccount(final Message message) {
+
+        try {
+            String rawData = new String(message.getBody());
+            System.out.println(rawData);
+            Account account = objectMapper.readValue(rawData, Account.class);
+            accountRepository.save(account);
+
+        } catch (JsonGenerationException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+```
+
+Uygulamada tanımlı postgresql sunucu ve giriş bilgileri ile, Repository class JPA-Hibernate yardımıyla Postgresql'e verileri göndererek kaydeder.
+
+```
+package com.example.rabbitmqlistener.repository;
+
+import com.example.rabbitmqlistener.model.Account;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface AccountRepository extends JpaRepository<Account, Long> {
+
+}
+```
+
+
+Postgresql da örnek olarak oluşturulan account tablosu kayıtları aşağıdadır. 
+```
+-[ RECORD 1 ]--------------------
+id          | 1
+balance     | 10000
+bank_name   | Anadolu Bankasi
+currency    | 1
+iban        | 2000 3000 5000 7000
+customer_id | 
+account_id  | 
+-[ RECORD 2 ]--------------------
+id          | 2
+balance     | 10000
+bank_name   | Garanti Bankasi
+currency    | 1
+iban        | 1000 1000 2000 3000
+customer_id | 
+account_id  | 
+-[ RECORD 3 ]--------------------
+id          | 3
+balance     | 10000
+bank_name   | Garanti Bankasi
+currency    | 1
+iban        | 1000 1000 2000 3000
+customer_id | 
+```
+
+
 
 ## JDBC, JdbcTemplate ve Hibernate ile bir DAO katmanını yazın ve avantajlarını ve dezavantajlarını kendi görüşlerinizle beraber yazın. OOP’nin polimorfizm’den yararlanarak aynı tabloya üç yöntem ile CRUD işlemlerini yapan kodu yazınız. (30 Puan)
 

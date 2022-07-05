@@ -22,8 +22,6 @@ public class AccountService {
 
     public Account createAccount(Account account) {
         rabbitTemplate.convertAndSend("isbasi-exchange","accountKey",account);
-
-//        accountRepository.save(account);
         return account;
     }
 
